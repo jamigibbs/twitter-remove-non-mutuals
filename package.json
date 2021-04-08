@@ -1,0 +1,16 @@
+{
+  "name": "twitter-remove-non-mutuals",
+  "version": "0.1.0",
+  "description": "Remove Twitter followers that are not mutuals.",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "author": "Jami GIbbs",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "dotenv": "6.2.0",
+    "inquirer": "6.2.1"
+  }
+}
