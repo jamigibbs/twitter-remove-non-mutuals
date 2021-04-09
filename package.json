@@ -4,13 +4,18 @@
   "description": "Remove Twitter followers that are not mutuals.",
   "main": "main.js",
   "scripts": {
-    "start": "node main.js"
+    "start": "node --no-warnings main.js"
   },
   "author": "Jami GIbbs",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.21.1",
+    "cookie-session": "^1.4.0",
     "dotenv": "6.2.0",
-    "inquirer": "6.2.1"
+    "express": "^4.17.1",
+    "inquirer": "6.2.1",
+    "open": "^8.0.5",
+    "passport": "^0.4.1",
+    "passport-twitter": "^1.0.4",
+    "twit": "^2.2.11"
   }
 }
