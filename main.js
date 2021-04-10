@@ -4,7 +4,7 @@ const inquirer = require('inquirer');
 const open = require('open');
 const Timer = require('tiny-timer');
 const consts = require('./constants');
-const { getFollowers, getFriends, blockUser, unblockUser } = require('./utils-twitter');
+const { getFollowers, getFriends, blockUser, unblockUser } = require('./twitter-api');
 const { msToTime, getNonMutualUsernames, handleExit } = require('./utils');
 const cookieSession = require('cookie-session');
 const passport = require('passport');
@@ -58,7 +58,7 @@ process.on('SIGTERM', () => {
   server.close(() => { console.log(consts.SERVER_CLOSED_MESSAGE) });
 });
 
-const timer = new Timer({ 
+const timer = new Timer({
   interval: consts.STOPWATCH_INTERVAL,
   stopwatch: true
 });
@@ -75,6 +75,11 @@ function startScript() {
 
 let queryCount = 0;
 
+/**
+ * This function will check how many API calls have been made so far
+ * and pause the script until additional calls can be made (ie. 15 min).
+ * Otherwise, the API will return a rate limit exceeded error.
+ */
 const queryLimitCheck = () => {
   return new Promise(function(resolve, reject) {
     queryCount++;
@@ -90,13 +95,20 @@ const queryLimitCheck = () => {
 
       setTimeout(() => {
         resolve();
-      }, consts.QUERY_LIMIT_WAIT_TIME); // 15.1 min.
+      }, consts.QUERY_LIMIT_WAIT_TIME);
     } else {
       resolve();
     }
   });
 }
 
+/**
+ * After user authentication, this function will get the user's friends and followers,
+ * determine which of those users are non-mutuals, and block/unblock them to force
+ * an unfollow.
+ * @param {object} client
+ * @param {string} username
+ */
 async function handleUnfollows(client, username) {
   let friends = [];
   let followers = [];
@@ -104,7 +116,12 @@ async function handleUnfollows(client, username) {
   let cursorFollowers = -1;
 
   try {
-    // For info about cursor, see https://developer.twitter.com/en/docs/basics/cursoring
+    /**
+     * Cursoring (paginating) the friends and follower requests. Twitter only allows 200
+     * results per query. This will allow us to retrieve all of the users while also
+     * keeping track of the number of queries we're making (to avoid rate limit exceeded error).
+     * For more info about cursor, see https://developer.twitter.com/en/docs/basics/cursoring
+     */
     while (cursorFriends !== 0) {
       const friendsData = await getFriends(client, username, cursorFriends);
       const friendsArray = friendsData.users;
@@ -121,6 +138,9 @@ async function handleUnfollows(client, username) {
       cursorFollowers = followersData.next_cursor;
     }
 
+    /**
+     * Extracting the usernames of non-mutuals.
+     */
     const unfollows = getNonMutualUsernames(friends, followers);
 
     if (unfollows && unfollows.length > 0 ) {
@@ -128,6 +148,7 @@ async function handleUnfollows(client, username) {
       const { remove } = await inquirer.prompt(questions);
       const removeAuth = remove.toLowerCase();
 
+      // Confirming unfollow action before executing.
       if (removeAuth === 'yes') {
         unfollows.forEach(async (unfollow) => {
           await blockUser(client, unfollow);

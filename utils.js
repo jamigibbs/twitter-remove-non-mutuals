@@ -1,6 +1,11 @@
 /* eslint-disable camelcase */
 const consts = require('./constants');
 
+/**
+ * Returns an array of non-mutual usernames.
+ * @param {array} friends
+ * @param {array} followers
+ */
 function getNonMutualUsernames(friends, followers){
   const notFollowed = followers.filter((follower) => {
     const isMatch = friends.find((friend) => {
@@ -14,6 +19,11 @@ function getNonMutualUsernames(friends, followers){
   });
 }
 
+/**
+ * Converts millisecond to a human readable format.
+ * https://stackoverflow.com/questions/19700283/how-to-convert-time-in-milliseconds-to-hours-min-sec-format-in-javascript/32180863#32180863
+ * @param {number} ms
+ */
 function msToTime(ms) {
   let seconds = (ms / 1000).toFixed(1);
   let minutes = (ms / (1000 * 60)).toFixed(1);
@@ -25,6 +35,10 @@ function msToTime(ms) {
   else return days + ' days'
 }
 
+/**
+ * Stops the server and exits terminal.
+ * @param {string} message
+ */
 function handleExit(message){
   console.log(message);
   process.kill(process.pid, 'SIGTERM');

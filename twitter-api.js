@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 
 /**
  * Returns a cursored collection of users that the provided username follows.
@@ -45,6 +46,11 @@ async function getFollowers(client, username, cursor) {
   }
 }
 
+/**
+ * Blocks the provided user.
+ * @param {object} client
+ * @param {username} username
+ */
 async function blockUser(client, username) {
   try {
     const { data } = await client.post('blocks/create', {
@@ -56,6 +62,11 @@ async function blockUser(client, username) {
   }
 }
 
+/**
+ * Unblocks the provided user.
+ * @param {object} client
+ * @param {username} username
+ */
 async function unblockUser(client, username) {
   try {
     const { data } = await client.post('blocks/destroy', {
