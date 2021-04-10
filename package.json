@@ -7,7 +7,7 @@
     "start": "node --no-warnings main.js"
   },
   "author": "Jami GIbbs",
-  "license": "MIT",
+  "license": "LGPL-3.0",
   "dependencies": {
     "cookie-session": "^1.4.0",
     "dotenv": "6.2.0",
