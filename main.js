@@ -55,7 +55,7 @@ const server = app.listen(8000, () => {
 });
 
 process.on('SIGTERM', () => {
-  server.close(() => { console.log(consts.SERVER_CLOSED_MESSAGE) });
+  server.close();
 });
 
 const timer = new Timer({
