@@ -1,53 +1,37 @@
 /* eslint-disable camelcase */
-require('dotenv').config();
+const consts = require('./constants');
 
-/**
- * Returns a cursored collection of users that the provided username follows.
- * The maximum number of users to return per page is 200.
- * Each page will count against the rate limit.
- * @param {object} client
- * @param {string} username
- * @param {number} cursor
- */
-async function getFriends(client, username, cursor) {
-  try {
-    const { data } = await client.get('friends/list', {
-      screen_name: username,
-      cursor: cursor,
-      count: 200,
-      skip_status: true,
-      skip_user_entities: true
-    })
-    return data;
-  } catch (err) {
-    throw(err);
-  }
+function getNonMutualUsernames(friends, followers){
+  const notFollowed = followers.filter((follower) => {
+    const isMatch = friends.find((friend) => {
+      return friend.screen_name === follower.screen_name;
+    });
+    if (!isMatch) return follower;
+  });
+
+  return notFollowed.map((user) => {
+    return user.screen_name;
+  });
 }
 
-/**
- * Returns a cursored collection of followers for the provided username.
- * The maximum number of users to return per page is 200.
- * Each page will count against the rate limit.
- * @param {object} client
- * @param {string} username
- * @param {number} cursor
- */
-async function getFollowers(client, username, cursor) {
-  try {
-    const { data } = await client.get('followers/list', {
-      screen_name: username,
-      cursor: cursor,
-      count: 200,
-      skip_status: true,
-      skip_user_entities: true
-    })
-    return data;
-  } catch (err) {
-    throw(err);
-  }
+function msToTime(ms) {
+  let seconds = (ms / 1000).toFixed(1);
+  let minutes = (ms / (1000 * 60)).toFixed(1);
+  let hours = (ms / (1000 * 60 * 60)).toFixed(1);
+  let days = (ms / (1000 * 60 * 60 * 24)).toFixed(1);
+  if (seconds < 60) return seconds + ' sec';
+  else if (minutes < 60) return minutes + ' min';
+  else if (hours < 24) return hours + ' hrs';
+  else return days + ' days'
+}
+
+function handleExit(message){
+  console.log(message);
+  process.kill(process.pid, 'SIGTERM');
 }
 
 module.exports = {
-  getFriends,
-  getFollowers
+  msToTime,
+  getNonMutualUsernames,
+  handleExit
 };

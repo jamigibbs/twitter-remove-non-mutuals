@@ -1,44 +1,41 @@
-/* eslint-disable function-paren-newline */
 /* eslint-disable camelcase */
 const Twitter = require('twit');
 const inquirer = require('inquirer');
 const open = require('open');
-const { getFollowers, getFriends } = require('./utils');
-const cookieSession = require('cookie-session')
+const Timer = require('tiny-timer');
+const consts = require('./constants');
+const { getFollowers, getFriends, blockUser, unblockUser } = require('./utils-twitter');
+const { msToTime, getNonMutualUsernames, handleExit } = require('./utils');
+const cookieSession = require('cookie-session');
 const passport = require('passport');
 require('./passport')
 
 require('dotenv').config();
 
-const express = require('express')
-const app = express()
-
-// const questions = [{
-//   type: 'input',
-//   name: 'username',
-//   message: 'Enter Twitter username',
-// }];
+const express = require('express');
+const path = require('path');
+const app = express();
 
 app.use(cookieSession({
   name: 'twitter-auth-session',
   signed: false
-}))
+}));
 
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('/', (_req, res) => {
-  res.send(`Thank you! You've been verified! You can close this window.`);
+  res.sendFile(path.join(__dirname, '/view/auth-confirm.html'));
 });
 
 app.get('/auth/twitter', passport.authenticate('twitter'));
 
-app.get('/auth/twitter/callback', passport.authenticate('twitter', { failureRedirect: '/auth/error' }),
-function(req, res) {
+app.get('/auth/error', (_req, res) => {
+  res.sendFile(path.join(__dirname, '/view/auth-failed.html'));
+});
 
+app.get('/auth/twitter/callback', passport.authenticate('twitter', { failureRedirect: '/auth/error' }), (req, res) => {
   const username = req.user.username;
-  const oauthVerifier = req.query.oauth_verifier;
-  const oauthToken = req.query.oauth_token;
   const accessToken = req.authInfo.accessToken;
   const refreshToken = req.authInfo.refreshToken;
 
@@ -50,16 +47,54 @@ function(req, res) {
   });
 
   handleUnfollows(client, username);
-
   res.redirect('/');
 });
 
-app.listen(8000, () => {
-  console.log('Server is up and running on port 8000')
+const server = app.listen(8000, () => {
+  console.log(consts.SERVER_RUNNING_MESSAGE);
 });
 
+process.on('SIGTERM', () => {
+  server.close(() => { console.log(consts.SERVER_CLOSED_MESSAGE) });
+});
+
+const timer = new Timer({ 
+  interval: consts.STOPWATCH_INTERVAL,
+  stopwatch: true
+});
+
+const questions = [{
+  type: 'input',
+  name: 'remove',
+  message: consts.ARE_YOU_SURE_YES_NO,
+}];
+
 function startScript() {
-  open('http://www.localhost:8000/auth/twitter');
+  open(`${consts.HOST}/auth/twitter`);
+}
+
+let queryCount = 0;
+
+const queryLimitCheck = () => {
+  return new Promise(function(resolve, reject) {
+    queryCount++;
+    if (queryCount >= 15) {
+      // Reset the query count for the next 15 minute batch.
+      queryCount = 0;
+
+      console.log(consts.HIT_QUERY_LIMIT);
+      console.log(consts.TIMER_STARTED);
+
+      timer.start(consts.QUERY_LIMIT_WAIT_TIME);
+      timer.on('tick', (ms) => console.log(consts.TIME_ELAPSED_LABEL, msToTime(ms)));
+
+      setTimeout(() => {
+        resolve();
+      }, consts.QUERY_LIMIT_WAIT_TIME); // 15.1 min.
+    } else {
+      resolve();
+    }
+  });
 }
 
 async function handleUnfollows(client, username) {
@@ -69,46 +104,53 @@ async function handleUnfollows(client, username) {
   let cursorFollowers = -1;
 
   try {
-    // const { username } = await inquirer.prompt(questions);
-
-    // TODO: Optimize for rate limiting. ie. 1 call every 61 seconds?
-
     // For info about cursor, see https://developer.twitter.com/en/docs/basics/cursoring
     while (cursorFriends !== 0) {
       const friendsData = await getFriends(client, username, cursorFriends);
       const friendsArray = friendsData.users;
       friends = friends.concat(friendsArray);
+      await queryLimitCheck();
       cursorFriends = friendsData.next_cursor;
     }
 
     while (cursorFollowers !== 0) {
       const followersData = await getFollowers(client, username, cursorFollowers);
-      let followersArray = followersData.users;
+      const followersArray = followersData.users;
       followers = followers.concat(followersArray);
+      await queryLimitCheck();
       cursorFollowers = followersData.next_cursor;
     }
 
-    // Compare followers and friends.
-    const notFollowed = followers.filter((follower) => {
-      const isMatch = friends.find((friend) => {
-        return friend.screen_name === follower.screen_name;
-      });
+    const unfollows = getNonMutualUsernames(friends, followers);
 
-      if (!isMatch) return follower;
-    });
+    if (unfollows && unfollows.length > 0 ) {
+      console.log(`You are about to remove ${unfollows.length} non-mutual(s) from your account.`);
+      const { remove } = await inquirer.prompt(questions);
+      const removeAuth = remove.toLowerCase();
 
-    // Usernames as comma separate string.
-    const usernamesToRemove = notFollowed.map((user) => {
-      return user.screen_name;
-    });
+      if (removeAuth === 'yes') {
+        unfollows.forEach(async (unfollow) => {
+          await blockUser(client, unfollow);
+          await queryLimitCheck();
+          await unblockUser(client, unfollow);
+          await queryLimitCheck();
 
-    // TODO: Block users in the not followed list.
-
-    // TODO: Unblock users in the not followed list.
-
+          handleExit(consts.COMPLETED_MESSAGE);
+        });
+      } else {
+        handleExit(consts.UNFOLLOW_AUTH_NOT_RECEIVED);
+      }
+    } else {
+      handleExit(consts.NO_UNFOLLOWS_AVAILABLE);
+    }
 
   } catch (err) {
-    console.log('/// Main Error', err);
+    if (err.statusCode === 429) {
+      handleExit(consts.RATE_LIMIT_EXCEEDED);
+    } else {
+      console.log('/// Error', err);
+      handleExit(consts.GENERAL_ERROR_MESSAGE);
+    }
   }
 }
 

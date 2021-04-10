@@ -16,6 +16,7 @@
     "open": "^8.0.5",
     "passport": "^0.4.1",
     "passport-twitter": "^1.0.4",
+    "tiny-timer": "^1.6.0",
     "twit": "^2.2.11"
   }
 }
