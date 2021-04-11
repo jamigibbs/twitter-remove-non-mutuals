@@ -8,6 +8,10 @@ This script will remove any non-mutuals (users that follow you but you do not fo
 - [Express](https://github.com/expressjs/express)
 - [Passport](http://www.passportjs.org/)
 
+### Use Case
+
+The primary use case for removing non-mutuals is when you've changed your account from public to private and would like to remove followers who had followed your account while it was public. With a private account, followers need to request permission to follow before they can view your tweets. Twitter does not automatically remove non-mutuals for you if you decide to go private.
+
 ## How to use
 
 This is an experimental script. If you'd like to use it for yourself, register an app in your [Twitter Developer dashboard](https://developer.twitter.com/en/portal/dashboard) for it and make note of the **API Key and Secret**. Give your app **Read and Write** permissions.
