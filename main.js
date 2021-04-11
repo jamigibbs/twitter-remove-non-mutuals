@@ -1,3 +1,5 @@
+/* eslint-disable max-statements */
+/* eslint-disable complexity */
 /* eslint-disable camelcase */
 const Twitter = require('twit');
 const inquirer = require('inquirer');
@@ -144,16 +146,15 @@ async function handleUnfollows(client, username) {
     if (unfollows && unfollows.length > 0 ) {
       console.log(`You are about to remove ${unfollows.length} non-mutual(s) from your account.`);
       const { remove } = await inquirer.prompt(questions);
-
       // Confirming unfollow action before executing.
       if (remove.toLowerCase() === 'yes') {
-        unfollows.forEach(async (unfollow) => {
+        for (const unfollow of unfollows) {
           await blockUser(client, unfollow);
           await queryLimitCheck();
           await unblockUser(client, unfollow);
           console.log(`Removed ${unfollow}`);
           await queryLimitCheck();
-        });
+        }
         handleExit(consts.COMPLETED_MESSAGE);
       } else {
         handleExit(consts.UNFOLLOW_AUTH_NOT_RECEIVED);
