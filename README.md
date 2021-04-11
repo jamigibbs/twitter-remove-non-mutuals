@@ -18,19 +18,19 @@ This is an experimental script. If you'd like to use it for yourself, register a
 
 ## Rate Limiting Challenges
 
-The endpoints used in this script are subject to a rate limit of 15 requests every 15 minutes (standard API). This creates quite a challenge for accounts with an even modest number of users to unfollow.
+The endpoints used in this script are subject to a rate limit of 15 requests every 15 minutes (Standard Twitter API). This creates quite a challenge for accounts with just a modest number of users to query and unfollow.
 
-Because of this, the script will pause in 15 min intervals in order to avoid triggering the Twitter rate limit error response. This means that it might take some time to complete all of the unfollows.
+Because of these rate limits, the script will pause in 15 min intervals in order to avoid triggering the Twitter rate limit error response. This means that it might take some time to complete all of the unfollows.
 
 An example scenario:
 
-- 2000 followers = 20 requests (received in 200 count batches)
-- 200 following = 1 request (received in one 200 count batch)
+- 1000 followers = 5 requests (received in 200 count batches)
+- 1000 following = 5 request (received in one 200 count batch)
 - 500 non-mutuals to unfollow = 1000 requests (one request to block and one request to unblock per user)
 
-1021 total request = ~1021 minutes (17 hrs)
+1010 total requests = ~1010 minutes (16.8 hrs)
 
-You can review Twitter's public rate limits below:
+You can review Twitter's Standard API public rate limits below:
 
 https://developer.twitter.com/en/docs/twitter-api/v1/rate-limits
 
