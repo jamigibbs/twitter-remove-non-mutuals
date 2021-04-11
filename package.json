@@ -2,11 +2,13 @@
   "name": "twitter-remove-non-mutuals",
   "version": "0.1.0",
   "description": "Remove Twitter followers that are not mutuals.",
+  "url" : "https://github.com/jamigibbs/twitter-remove-non-mutuals/issues",
   "main": "main.js",
   "scripts": {
     "start": "node --no-warnings main.js"
   },
-  "author": "Jami GIbbs",
+  "author": "Jami Gibbs",
+  "email" : "jami0821@gmail.com",
   "license": "LGPL-3.0",
   "dependencies": {
     "cookie-session": "^1.4.0",
