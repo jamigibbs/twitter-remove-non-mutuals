@@ -46,6 +46,7 @@ app.get('/auth/twitter/callback', passport.authenticate('twitter', { failureRedi
     access_token_secret:  refreshToken
   });
 
+  console.log(consts.STARTING_SCRIPT_MESSAGE);
   handleUnfollows(client, username);
   res.redirect('/');
 });
@@ -110,10 +111,7 @@ const queryLimitCheck = () => {
  * @param {string} username
  */
 async function handleUnfollows(client, username) {
-  let friends = [];
-  let followers = [];
-  let cursorFriends = -1;
-  let cursorFollowers = -1;
+  let friends = [], followers = [], cursorFriends = -1, cursorFollowers = -1;
 
   try {
     /**
@@ -146,18 +144,17 @@ async function handleUnfollows(client, username) {
     if (unfollows && unfollows.length > 0 ) {
       console.log(`You are about to remove ${unfollows.length} non-mutual(s) from your account.`);
       const { remove } = await inquirer.prompt(questions);
-      const removeAuth = remove.toLowerCase();
 
       // Confirming unfollow action before executing.
-      if (removeAuth === 'yes') {
+      if (remove.toLowerCase() === 'yes') {
         unfollows.forEach(async (unfollow) => {
           await blockUser(client, unfollow);
           await queryLimitCheck();
           await unblockUser(client, unfollow);
+          console.log(`Removed ${unfollow}`);
           await queryLimitCheck();
-
-          handleExit(consts.COMPLETED_MESSAGE);
         });
+        handleExit(consts.COMPLETED_MESSAGE);
       } else {
         handleExit(consts.UNFOLLOW_AUTH_NOT_RECEIVED);
       }

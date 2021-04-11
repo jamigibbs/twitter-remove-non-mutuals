@@ -11,5 +11,6 @@ module.exports = Object.freeze({
   UNFOLLOW_AUTH_NOT_RECEIVED: "Whatever you entered wasn't 'yes' so exiting the script just to be safe. 👋",
   NO_UNFOLLOWS_AVAILABLE: 'No non-mutuals to unfollow right now. Later, gator! 👋',
   RATE_LIMIT_EXCEEDED: '😢 Rate limit exceeded. Please wait 15 minutes and try again.',
-  GENERAL_ERROR_MESSAGE: '❌ An error occurred'
+  GENERAL_ERROR_MESSAGE: '❌ An error occurred',
+  STARTING_SCRIPT_MESSAGE: 'Getting users to remove'
 });
