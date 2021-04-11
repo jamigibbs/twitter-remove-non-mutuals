@@ -17,7 +17,7 @@ This is an experimental script. If you'd like to use it for yourself, register a
 3. `npm install`
 4. `npm start`
 
-## Rate Limiting Challenges
+## Rate Limit Challenges
 
 The endpoints used in this script are subject to a rate limit of 15 requests every 15 minutes (Standard Twitter API). This creates quite a challenge for accounts with just a modest number of users to query and unfollow.
 
