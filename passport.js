@@ -1,5 +1,6 @@
 const passport = require('passport');
 const TwitterStrategy = require('passport-twitter').Strategy;
+const consts = require('./constants');
 
 require('dotenv').config();
 
@@ -14,7 +15,7 @@ passport.deserializeUser(function(user, done) {
 passport.use(new TwitterStrategy({
     consumerKey: process.env.CLIENT_KEY,
     consumerSecret: process.env.CLIENT_SECRET,
-    callbackURL: 'http://www.localhost:8000/auth/twitter/callback',
+    callbackURL: `${consts.HOST}/auth/twitter/callback`,
   },
 
   function(accessToken, refreshToken, profile, done) {
