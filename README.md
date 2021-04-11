@@ -25,7 +25,7 @@ Because of these rate limits, the script will pause in 15 min intervals in order
 An example scenario:
 
 - 1000 followers = 5 requests (received in 200 count batches)
-- 1000 following = 5 request (received in one 200 count batch)
+- 1000 following = 5 request (received in 200 count batches)
 - 500 non-mutuals to unfollow = 1000 requests (one request to block and one request to unblock per user)
 
 1010 total requests = ~1010 minutes (16.8 hrs)
