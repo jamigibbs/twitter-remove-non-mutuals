@@ -1,6 +1,6 @@
 # Twitter Remove Non-Mutuals
 
-This script will remove any non-mutuals from an authenticated Twitter account.
+This script will remove any non-mutuals (users that follow you but you do not follow in return) from an authenticated Twitter account.
 
 - [Standard Twitter API v1.1](https://developer.twitter.com/en/docs/twitter-api/v1)
 - [Twitter OAuth 1.0a](https://developer.twitter.com/en/docs/authentication/oauth-1-0a)
