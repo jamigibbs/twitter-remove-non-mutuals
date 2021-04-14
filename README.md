@@ -18,6 +18,12 @@ This is an experimental script. If you'd like to use it for yourself, first ackn
 
 Next register an app in your [Twitter Developer dashboard](https://developer.twitter.com/en/portal/dashboard) for it and make note of the **API Key and Secret**. Give your app **Read and Write** permissions.
 
+In your registered app under the **Edit authentication settings**, update the following:
+
+- Turn on **Enable 3-legged OAuth**
+- Add the following **Callback URLs**: http://www.localhost:8000/auth/twitter/callback
+- Add the following **Website URL**: http://www.localhost:8000
+
 1. Clone this repository to your local machine and navigate to the project folder `cd twitter-remove-non-mutuals`.
 2.  Rename the `.env-example` file to `.env` and update it with the API key and secret you saved when you created your app in your Twitter Developer dashboard.
 3. `npm install`
